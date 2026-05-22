@@ -657,6 +657,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
+
 # ─── JUEGO DE UNIR ────────────────────────────────────────────────────────────
 GAME_PHOTOS = {
     "Santa María": "https://res.cloudinary.com/dxkofni5c/image/upload/3dec3935-505c-43b6-88ba-91916352a1a0_ulkd5d",
@@ -780,8 +781,9 @@ def matching_game():
             </div>
             """, unsafe_allow_html=True)
             if not p_matched:
-                btn_lbl = f"{'★' if p_sel else '○'}  Foto {idx_p+1}"
-                if st.button(btn_lbl, key=f"ph_{place}", use_container_width=True):
+                btn_lbl = f"'★' if p_sel else '○'"
+                is_sel_str = "★" if p_sel else "○"
+                if st.button(f"{is_sel_str}  Foto {idx_p+1}", key=f"ph_{place}", use_container_width=True):
                     if p_sel:
                         st.session_state.mg_sel_photo = None
                         st.rerun()
