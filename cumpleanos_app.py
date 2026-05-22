@@ -8,6 +8,8 @@ import cloudinary.uploader
 import cloudinary.api
 import math, time
 
+
+
 # ─── Configuración de página ───────────────────────────────────────────────────
 st.set_page_config(
     page_title="Feliz Cumpleaños Laura 🌹",
