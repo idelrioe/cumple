@@ -28,6 +28,198 @@ def init_cloudinary():
 
 init_cloudinary()
 
+# ─── JUEGO DE UNIR ────────────────────────────────────────────────────────────
+GAME_PHOTOS = {
+    "Santa María": "https://res.cloudinary.com/dxkofni5c/image/upload/3dec3935-505c-43b6-88ba-91916352a1a0_ulkd5d",
+    "Toledo":      "https://res.cloudinary.com/dxkofni5c/image/upload/94c7fa55-644d-4d5d-bf04-00606c317d77_gd1nvs",
+    "Zeluán":      "https://res.cloudinary.com/dxkofni5c/image/upload/da3ec542-7d34-4bd0-aaff-02bc8b4453c3_bwcd0j",
+    "Avilés":      "https://res.cloudinary.com/dxkofni5c/image/upload/db0b4c8b-28c8-4fa3-81e1-18d57d131466_aa7chi",
+}
+
+def matching_game():
+    import random, time
+
+    st.markdown("""
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;1,300&family=Montserrat:wght@200;300&display=swap');
+    .game-header { text-align:center; padding:3rem 1rem 1.5rem; }
+    .game-eyebrow { font-family:'Montserrat',sans-serif; font-weight:200; font-size:0.65rem; letter-spacing:0.5rem; color:rgba(201,149,108,0.5); text-transform:uppercase; margin-bottom:1rem; }
+    .game-title { font-family:'Cormorant Garamond',serif; font-size:2.2rem; font-weight:300; font-style:italic; color:#f0d8c0; margin-bottom:0.4rem; }
+    .game-subtitle { font-family:'Montserrat',sans-serif; font-weight:200; font-size:0.72rem; color:rgba(201,149,108,0.5); letter-spacing:0.2rem; }
+    .game-divider { width:60px; height:1px; background:linear-gradient(90deg,transparent,#c9956c,transparent); margin:1.5rem auto 2rem; }
+    .progress-wrap { background:rgba(255,255,255,0.05); border-radius:2px; height:3px; margin:0 auto 1.5rem; max-width:500px; overflow:hidden; }
+    .progress-fill { height:100%; background:linear-gradient(90deg,#c9956c,#e8b88a); border-radius:2px; transition:width 0.5s; }
+    .game-fb { text-align:center; font-family:'Montserrat',sans-serif; font-weight:200; font-size:0.78rem; min-height:1.4rem; margin-bottom:0.8rem; letter-spacing:0.1rem; }
+    .fb-ok { color:rgba(100,210,130,0.9); }
+    .fb-err { color:rgba(220,100,100,0.8); }
+    .slabel { font-family:'Montserrat',sans-serif; font-weight:200; font-size:0.6rem; letter-spacing:0.35rem; color:rgba(201,149,108,0.35); text-transform:uppercase; text-align:center; margin-bottom:0.8rem; }
+    .victory-wrap { text-align:center; padding:5rem 2rem; position:relative; z-index:2; }
+    .victory-title { font-family:'Cormorant Garamond',serif; font-size:3rem; font-weight:300; font-style:italic; color:#e8b88a; margin-bottom:1rem; }
+    .victory-sub { font-family:'Montserrat',sans-serif; font-weight:200; font-size:0.75rem; letter-spacing:0.3rem; color:rgba(201,149,108,0.6); text-transform:uppercase; }
+    </style>
+    """, unsafe_allow_html=True)
+
+    if "mg_matched" not in st.session_state:
+        st.session_state.mg_matched = {}
+    if "mg_sel_photo" not in st.session_state:
+        st.session_state.mg_sel_photo = None
+    if "mg_sel_loc" not in st.session_state:
+        st.session_state.mg_sel_loc = None
+    if "mg_feedback" not in st.session_state:
+        st.session_state.mg_feedback = ("", "")
+    if "mg_photo_order" not in st.session_state:
+        order = list(GAME_PHOTOS.keys())
+        random.shuffle(order)
+        st.session_state.mg_photo_order = order
+    if "mg_loc_order" not in st.session_state:
+        locs = list(GAME_PHOTOS.keys())
+        random.shuffle(locs)
+        st.session_state.mg_loc_order = locs
+
+    mg = st.session_state.mg_matched
+    total = len(GAME_PHOTOS)
+
+    if len(mg) == total:
+        st.markdown("""
+        <div class="victory-wrap">
+            <div style="font-size:4rem;margin-bottom:1.5rem;">🌹</div>
+            <div class="victory-title">¡Lo sabías todo, mi amor!</div>
+            <div class="victory-sub">Abriendo nuestro álbum...</div>
+        </div>
+        """, unsafe_allow_html=True)
+        time.sleep(2)
+        st.session_state.puzzle_solved = True
+        st.rerun()
+        return
+
+    pct = int(len(mg) / total * 100)
+    st.markdown(f"""
+    <div class="game-header">
+        <div class="game-eyebrow">✦ &nbsp; para acceder &nbsp; ✦</div>
+        <div class="game-title">¿Reconoces nuestros momentos?</div>
+        <div class="game-subtitle">Une cada foto con su lugar · {len(mg)} de {total} encontrados</div>
+        <div class="game-divider"></div>
+    </div>
+    <div class="progress-wrap"><div class="progress-fill" style="width:{pct}%"></div></div>
+    """, unsafe_allow_html=True)
+
+    fb_text, fb_cls = st.session_state.mg_feedback
+    st.markdown(f'<div class="game-fb {fb_cls}">{fb_text}</div>', unsafe_allow_html=True)
+
+    def try_match(sp, sl):
+        if sp and sl:
+            if sp == sl:
+                st.session_state.mg_matched[sp] = sl
+                st.session_state.mg_feedback = ("¡Correcto! 🌹", "fb-ok")
+            else:
+                st.session_state.mg_feedback = ("No es ese lugar... inténtalo de nuevo 💫", "fb-err")
+            st.session_state.mg_sel_photo = None
+            st.session_state.mg_sel_loc = None
+            st.rerun()
+
+    # ── Fotos ──
+    st.markdown('<p class="slabel">▼ &nbsp; Selecciona una foto &nbsp; ▼</p>', unsafe_allow_html=True)
+    cols = st.columns(2)
+    for idx_p, place in enumerate(st.session_state.mg_photo_order):
+        url = GAME_PHOTOS[place]
+        p_matched = place in mg
+        p_sel = st.session_state.mg_sel_photo == place
+
+        if p_matched:
+            border_p = "rgba(100,200,130,0.5)"
+            bright_p = "brightness(0.9)"
+            label_p = mg.get(place, "")
+            label_color = "rgba(100,220,130,0.9)"
+        elif p_sel:
+            border_p = "#c9956c"
+            bright_p = "brightness(1)"
+            label_p = "SELECCIONADA"
+            label_color = "rgba(255,220,150,0.9)"
+        else:
+            border_p = "rgba(201,149,108,0.15)"
+            bright_p = "brightness(0.6) saturate(0.7)"
+            label_p = ""
+            label_color = "rgba(255,255,255,0.3)"
+
+        with cols[idx_p % 2]:
+            st.markdown(f"""
+            <div style="border:2px solid {border_p};border-radius:4px;overflow:hidden;position:relative;aspect-ratio:1;margin-bottom:0.4rem;">
+                <img src="{url}" style="width:100%;height:100%;object-fit:cover;display:block;filter:{bright_p};" />
+                <div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,0.7));padding:1.2rem 0.5rem 0.4rem;font-family:Montserrat,sans-serif;font-weight:200;font-size:0.58rem;letter-spacing:0.15rem;text-transform:uppercase;color:{label_color};text-align:center;">
+                    {label_p}
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+            if not p_matched:
+                btn_lbl = f"'★' if p_sel else '○'"
+                is_sel_str = "★" if p_sel else "○"
+                if st.button(f"{is_sel_str}  Foto {idx_p+1}", key=f"ph_{place}", use_container_width=True):
+                    if p_sel:
+                        st.session_state.mg_sel_photo = None
+                        st.rerun()
+                    else:
+                        st.session_state.mg_sel_photo = place
+                        st.session_state.mg_feedback = ("", "")
+                        try_match(place, st.session_state.mg_sel_loc)
+
+    # ── Lugares ──
+    st.markdown('<p class="slabel" style="margin-top:1.2rem;">▼ &nbsp; Selecciona el lugar &nbsp; ▼</p>', unsafe_allow_html=True)
+    loc_cols = st.columns(2)
+    for idx_l, loc in enumerate(st.session_state.mg_loc_order):
+        l_matched = any(v == loc for v in mg.values())
+        l_sel = st.session_state.mg_sel_loc == loc
+        with loc_cols[idx_l % 2]:
+            if l_matched:
+                st.markdown(f'<div style="padding:0.9rem;background:rgba(100,200,130,0.06);border:1px solid rgba(100,200,130,0.3);border-radius:3px;text-align:center;font-family:Cormorant Garamond,serif;font-size:1.1rem;color:rgba(100,210,130,0.7);font-style:italic;margin-bottom:0.4rem;">✓ {loc}</div>', unsafe_allow_html=True)
+            else:
+                bc = "#c9956c" if l_sel else "rgba(201,149,108,0.2)"
+                bg = "rgba(201,149,108,0.12)" if l_sel else "rgba(201,149,108,0.04)"
+                cc = "#f0d8c0" if l_sel else "#c8a882"
+                prefix = "★ " if l_sel else ""
+                st.markdown(f'<div style="border:1px solid {bc};border-radius:3px;background:{bg};padding:0.9rem;text-align:center;font-family:Cormorant Garamond,serif;font-size:1.1rem;color:{cc};font-style:italic;margin-bottom:0.4rem;">{prefix}{loc}</div>', unsafe_allow_html=True)
+                if st.button(loc, key=f"loc_{loc}", use_container_width=True):
+                    if l_sel:
+                        st.session_state.mg_sel_loc = None
+                        st.rerun()
+                    else:
+                        st.session_state.mg_sel_loc = loc
+                        st.session_state.mg_feedback = ("", "")
+                        try_match(st.session_state.mg_sel_photo, loc)
+
+
+# ─── Control de acceso ────────────────────────────────────────────────────────
+if "puzzle_solved" not in st.session_state:
+    st.session_state.puzzle_solved = False
+
+if not st.session_state.puzzle_solved:
+    st.markdown("""
+    <canvas id="stars-canvas"></canvas>
+    <script>
+    (function() {
+        const canvas = document.getElementById('stars-canvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        let W, H, stars = [], particles = [];
+        function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+        resize(); window.addEventListener('resize', resize);
+        for (let i = 0; i < 200; i++) stars.push({ x: Math.random(), y: Math.random(), r: Math.random()*1.2+0.2, a: Math.random(), speed: Math.random()*0.005+0.002, phase: Math.random()*Math.PI*2 });
+        function newP() { return { x: Math.random()*W, y: H+10, r: Math.random()*1.5+0.5, vy: -(Math.random()*0.4+0.15), vx: (Math.random()-0.5)*0.3, a: Math.random()*0.5+0.2, life: 0, maxLife: Math.random()*400+200 }; }
+        for (let i = 0; i < 40; i++) { let p = newP(); p.y = Math.random()*H; p.life = Math.random()*p.maxLife; particles.push(p); }
+        let t = 0;
+        function draw() {
+            ctx.clearRect(0, 0, W, H); t++;
+            for (let s of stars) { let alpha = s.a*(0.5+0.5*Math.sin(t*s.speed+s.phase)); ctx.beginPath(); ctx.arc(s.x*W, s.y*H, s.r, 0, Math.PI*2); ctx.fillStyle = `rgba(220,200,180,${alpha})`; ctx.fill(); }
+            for (let i = particles.length-1; i >= 0; i--) { let p = particles[i]; p.x+=p.vx; p.y+=p.vy; p.life++; let fade = p.life<60?p.life/60:p.life>p.maxLife-60?(p.maxLife-p.life)/60:1; ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fillStyle=`rgba(201,149,108,${p.a*fade*0.6})`; ctx.fill(); if(p.life>=p.maxLife) particles[i]=newP(); }
+            requestAnimationFrame(draw);
+        }
+        draw();
+    })();
+    </script>
+    """, unsafe_allow_html=True)
+    matching_game()
+    st.stop()
+
+
 
 
 
@@ -656,195 +848,3 @@ st.markdown("""
     <div style="font-size:1rem;opacity:0.2;margin-top:0.5rem;letter-spacing:1rem;">✦ ✦ ✦</div>
 </div>
 """, unsafe_allow_html=True)
-
-
-# ─── JUEGO DE UNIR ────────────────────────────────────────────────────────────
-GAME_PHOTOS = {
-    "Santa María": "https://res.cloudinary.com/dxkofni5c/image/upload/3dec3935-505c-43b6-88ba-91916352a1a0_ulkd5d",
-    "Toledo":      "https://res.cloudinary.com/dxkofni5c/image/upload/94c7fa55-644d-4d5d-bf04-00606c317d77_gd1nvs",
-    "Zeluán":      "https://res.cloudinary.com/dxkofni5c/image/upload/da3ec542-7d34-4bd0-aaff-02bc8b4453c3_bwcd0j",
-    "Avilés":      "https://res.cloudinary.com/dxkofni5c/image/upload/db0b4c8b-28c8-4fa3-81e1-18d57d131466_aa7chi",
-}
-
-def matching_game():
-    import random, time
-
-    st.markdown("""
-    <style>
-    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;1,300&family=Montserrat:wght@200;300&display=swap');
-    .game-header { text-align:center; padding:3rem 1rem 1.5rem; }
-    .game-eyebrow { font-family:'Montserrat',sans-serif; font-weight:200; font-size:0.65rem; letter-spacing:0.5rem; color:rgba(201,149,108,0.5); text-transform:uppercase; margin-bottom:1rem; }
-    .game-title { font-family:'Cormorant Garamond',serif; font-size:2.2rem; font-weight:300; font-style:italic; color:#f0d8c0; margin-bottom:0.4rem; }
-    .game-subtitle { font-family:'Montserrat',sans-serif; font-weight:200; font-size:0.72rem; color:rgba(201,149,108,0.5); letter-spacing:0.2rem; }
-    .game-divider { width:60px; height:1px; background:linear-gradient(90deg,transparent,#c9956c,transparent); margin:1.5rem auto 2rem; }
-    .progress-wrap { background:rgba(255,255,255,0.05); border-radius:2px; height:3px; margin:0 auto 1.5rem; max-width:500px; overflow:hidden; }
-    .progress-fill { height:100%; background:linear-gradient(90deg,#c9956c,#e8b88a); border-radius:2px; transition:width 0.5s; }
-    .game-fb { text-align:center; font-family:'Montserrat',sans-serif; font-weight:200; font-size:0.78rem; min-height:1.4rem; margin-bottom:0.8rem; letter-spacing:0.1rem; }
-    .fb-ok { color:rgba(100,210,130,0.9); }
-    .fb-err { color:rgba(220,100,100,0.8); }
-    .slabel { font-family:'Montserrat',sans-serif; font-weight:200; font-size:0.6rem; letter-spacing:0.35rem; color:rgba(201,149,108,0.35); text-transform:uppercase; text-align:center; margin-bottom:0.8rem; }
-    .victory-wrap { text-align:center; padding:5rem 2rem; position:relative; z-index:2; }
-    .victory-title { font-family:'Cormorant Garamond',serif; font-size:3rem; font-weight:300; font-style:italic; color:#e8b88a; margin-bottom:1rem; }
-    .victory-sub { font-family:'Montserrat',sans-serif; font-weight:200; font-size:0.75rem; letter-spacing:0.3rem; color:rgba(201,149,108,0.6); text-transform:uppercase; }
-    </style>
-    """, unsafe_allow_html=True)
-
-    if "mg_matched" not in st.session_state:
-        st.session_state.mg_matched = {}
-    if "mg_sel_photo" not in st.session_state:
-        st.session_state.mg_sel_photo = None
-    if "mg_sel_loc" not in st.session_state:
-        st.session_state.mg_sel_loc = None
-    if "mg_feedback" not in st.session_state:
-        st.session_state.mg_feedback = ("", "")
-    if "mg_photo_order" not in st.session_state:
-        order = list(GAME_PHOTOS.keys())
-        random.shuffle(order)
-        st.session_state.mg_photo_order = order
-    if "mg_loc_order" not in st.session_state:
-        locs = list(GAME_PHOTOS.keys())
-        random.shuffle(locs)
-        st.session_state.mg_loc_order = locs
-
-    mg = st.session_state.mg_matched
-    total = len(GAME_PHOTOS)
-
-    if len(mg) == total:
-        st.markdown("""
-        <div class="victory-wrap">
-            <div style="font-size:4rem;margin-bottom:1.5rem;">🌹</div>
-            <div class="victory-title">¡Lo sabías todo, mi amor!</div>
-            <div class="victory-sub">Abriendo nuestro álbum...</div>
-        </div>
-        """, unsafe_allow_html=True)
-        time.sleep(2)
-        st.session_state.puzzle_solved = True
-        st.rerun()
-        return
-
-    pct = int(len(mg) / total * 100)
-    st.markdown(f"""
-    <div class="game-header">
-        <div class="game-eyebrow">✦ &nbsp; para acceder &nbsp; ✦</div>
-        <div class="game-title">¿Reconoces nuestros momentos?</div>
-        <div class="game-subtitle">Une cada foto con su lugar · {len(mg)} de {total} encontrados</div>
-        <div class="game-divider"></div>
-    </div>
-    <div class="progress-wrap"><div class="progress-fill" style="width:{pct}%"></div></div>
-    """, unsafe_allow_html=True)
-
-    fb_text, fb_cls = st.session_state.mg_feedback
-    st.markdown(f'<div class="game-fb {fb_cls}">{fb_text}</div>', unsafe_allow_html=True)
-
-    def try_match(sp, sl):
-        if sp and sl:
-            if sp == sl:
-                st.session_state.mg_matched[sp] = sl
-                st.session_state.mg_feedback = ("¡Correcto! 🌹", "fb-ok")
-            else:
-                st.session_state.mg_feedback = ("No es ese lugar... inténtalo de nuevo 💫", "fb-err")
-            st.session_state.mg_sel_photo = None
-            st.session_state.mg_sel_loc = None
-            st.rerun()
-
-    # ── Fotos ──
-    st.markdown('<p class="slabel">▼ &nbsp; Selecciona una foto &nbsp; ▼</p>', unsafe_allow_html=True)
-    cols = st.columns(2)
-    for idx_p, place in enumerate(st.session_state.mg_photo_order):
-        url = GAME_PHOTOS[place]
-        p_matched = place in mg
-        p_sel = st.session_state.mg_sel_photo == place
-
-        if p_matched:
-            border_p = "rgba(100,200,130,0.5)"
-            bright_p = "brightness(0.9)"
-            label_p = mg.get(place, "")
-            label_color = "rgba(100,220,130,0.9)"
-        elif p_sel:
-            border_p = "#c9956c"
-            bright_p = "brightness(1)"
-            label_p = "SELECCIONADA"
-            label_color = "rgba(255,220,150,0.9)"
-        else:
-            border_p = "rgba(201,149,108,0.15)"
-            bright_p = "brightness(0.6) saturate(0.7)"
-            label_p = ""
-            label_color = "rgba(255,255,255,0.3)"
-
-        with cols[idx_p % 2]:
-            st.markdown(f"""
-            <div style="border:2px solid {border_p};border-radius:4px;overflow:hidden;position:relative;aspect-ratio:1;margin-bottom:0.4rem;">
-                <img src="{url}" style="width:100%;height:100%;object-fit:cover;display:block;filter:{bright_p};" />
-                <div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,0.7));padding:1.2rem 0.5rem 0.4rem;font-family:Montserrat,sans-serif;font-weight:200;font-size:0.58rem;letter-spacing:0.15rem;text-transform:uppercase;color:{label_color};text-align:center;">
-                    {label_p}
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
-            if not p_matched:
-                btn_lbl = f"'★' if p_sel else '○'"
-                is_sel_str = "★" if p_sel else "○"
-                if st.button(f"{is_sel_str}  Foto {idx_p+1}", key=f"ph_{place}", use_container_width=True):
-                    if p_sel:
-                        st.session_state.mg_sel_photo = None
-                        st.rerun()
-                    else:
-                        st.session_state.mg_sel_photo = place
-                        st.session_state.mg_feedback = ("", "")
-                        try_match(place, st.session_state.mg_sel_loc)
-
-    # ── Lugares ──
-    st.markdown('<p class="slabel" style="margin-top:1.2rem;">▼ &nbsp; Selecciona el lugar &nbsp; ▼</p>', unsafe_allow_html=True)
-    loc_cols = st.columns(2)
-    for idx_l, loc in enumerate(st.session_state.mg_loc_order):
-        l_matched = any(v == loc for v in mg.values())
-        l_sel = st.session_state.mg_sel_loc == loc
-        with loc_cols[idx_l % 2]:
-            if l_matched:
-                st.markdown(f'<div style="padding:0.9rem;background:rgba(100,200,130,0.06);border:1px solid rgba(100,200,130,0.3);border-radius:3px;text-align:center;font-family:Cormorant Garamond,serif;font-size:1.1rem;color:rgba(100,210,130,0.7);font-style:italic;margin-bottom:0.4rem;">✓ {loc}</div>', unsafe_allow_html=True)
-            else:
-                bc = "#c9956c" if l_sel else "rgba(201,149,108,0.2)"
-                bg = "rgba(201,149,108,0.12)" if l_sel else "rgba(201,149,108,0.04)"
-                cc = "#f0d8c0" if l_sel else "#c8a882"
-                prefix = "★ " if l_sel else ""
-                st.markdown(f'<div style="border:1px solid {bc};border-radius:3px;background:{bg};padding:0.9rem;text-align:center;font-family:Cormorant Garamond,serif;font-size:1.1rem;color:{cc};font-style:italic;margin-bottom:0.4rem;">{prefix}{loc}</div>', unsafe_allow_html=True)
-                if st.button(loc, key=f"loc_{loc}", use_container_width=True):
-                    if l_sel:
-                        st.session_state.mg_sel_loc = None
-                        st.rerun()
-                    else:
-                        st.session_state.mg_sel_loc = loc
-                        st.session_state.mg_feedback = ("", "")
-                        try_match(st.session_state.mg_sel_photo, loc)
-
-
-# ─── Control de acceso ────────────────────────────────────────────────────────
-if "puzzle_solved" not in st.session_state:
-    st.session_state.puzzle_solved = False
-
-if not st.session_state.puzzle_solved:
-    st.markdown("""
-    <canvas id="stars-canvas"></canvas>
-    <script>
-    (function() {
-        const canvas = document.getElementById('stars-canvas');
-        if (!canvas) return;
-        const ctx = canvas.getContext('2d');
-        let W, H, stars = [], particles = [];
-        function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
-        resize(); window.addEventListener('resize', resize);
-        for (let i = 0; i < 200; i++) stars.push({ x: Math.random(), y: Math.random(), r: Math.random()*1.2+0.2, a: Math.random(), speed: Math.random()*0.005+0.002, phase: Math.random()*Math.PI*2 });
-        function newP() { return { x: Math.random()*W, y: H+10, r: Math.random()*1.5+0.5, vy: -(Math.random()*0.4+0.15), vx: (Math.random()-0.5)*0.3, a: Math.random()*0.5+0.2, life: 0, maxLife: Math.random()*400+200 }; }
-        for (let i = 0; i < 40; i++) { let p = newP(); p.y = Math.random()*H; p.life = Math.random()*p.maxLife; particles.push(p); }
-        let t = 0;
-        function draw() {
-            ctx.clearRect(0, 0, W, H); t++;
-            for (let s of stars) { let alpha = s.a*(0.5+0.5*Math.sin(t*s.speed+s.phase)); ctx.beginPath(); ctx.arc(s.x*W, s.y*H, s.r, 0, Math.PI*2); ctx.fillStyle = `rgba(220,200,180,${alpha})`; ctx.fill(); }
-            for (let i = particles.length-1; i >= 0; i--) { let p = particles[i]; p.x+=p.vx; p.y+=p.vy; p.life++; let fade = p.life<60?p.life/60:p.life>p.maxLife-60?(p.maxLife-p.life)/60:1; ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fillStyle=`rgba(201,149,108,${p.a*fade*0.6})`; ctx.fill(); if(p.life>=p.maxLife) particles[i]=newP(); }
-            requestAnimationFrame(draw);
-        }
-        draw();
-    })();
-    </script>
-    """, unsafe_allow_html=True)
-    matching_game()
-    st.stop()
