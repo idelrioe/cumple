@@ -43,7 +43,7 @@ def matching_game():
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300&family=Montserrat:wght@200;300;500&display=swap');
 
-    @keyframes sel-glow { 0%,100%{box-shadow:0 0 18px rgba(201,149,108,0.6),0 0 40px rgba(201,149,108,0.25)} 50%{box-shadow:0 0 28px rgba(232,184,138,0.9),0 0 60px rgba(201,149,108,0.4)} }
+    @keyframes sel-glow { 0%,100%{box-shadow:0 0 25px rgba(201,149,108,0.75),0 0 55px rgba(201,149,108,0.3),0 0 0 3px rgba(232,184,138,0.5)} 50%{box-shadow:0 0 40px rgba(232,184,138,1),0 0 80px rgba(201,149,108,0.55),0 0 0 3px rgba(244,207,160,0.8)} }
     @keyframes badge-in { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
 
     .game-header { text-align:center; padding:3rem 1rem 1.5rem; }
@@ -59,20 +59,48 @@ def matching_game():
     .slabel { font-family:'Montserrat',sans-serif; font-weight:300; font-size:0.58rem; letter-spacing:0.4rem; color:rgba(201,149,108,0.5); text-transform:uppercase; text-align:center; margin-bottom:0.8rem; }
 
     /* Foto seleccionada */
-    .photo-card-sel { border:3px solid #e8b88a !important; border-radius:10px !important; animation:sel-glow 1.8s ease-in-out infinite !important; transform:scale(1.02); }
-    .photo-card-normal { border:2px solid rgba(201,149,108,0.15); border-radius:8px; transition:border-color 0.3s; }
+    .photo-card-sel { border:3px solid rgba(232,184,138,0.9) !important; border-radius:12px !important; animation:sel-glow 1.8s ease-in-out infinite !important; transform:scale(1.03); transition:transform 0.3s; }
+    .photo-card-normal { border:2px solid rgba(201,149,108,0.12); border-radius:10px; transition:all 0.3s; opacity:0.8; }
+    .photo-card-normal:hover { border-color:rgba(201,149,108,0.3); opacity:1; }
     .photo-card-matched { border:2px solid rgba(100,220,130,0.5); border-radius:8px; }
     .sel-badge { position:absolute;top:8px;left:8px;right:8px;background:linear-gradient(135deg,rgba(201,149,108,0.97),rgba(232,184,138,0.97));border-radius:6px;padding:6px 10px;text-align:center;font-family:'Montserrat',sans-serif;font-size:0.58rem;font-weight:500;letter-spacing:0.25rem;color:#1a0d06;text-transform:uppercase;animation:badge-in 0.25s ease; box-shadow:0 2px 10px rgba(0,0,0,0.5); }
     .matched-badge { position:absolute;top:8px;left:8px;right:8px;background:linear-gradient(135deg,rgba(40,170,90,0.95),rgba(60,200,110,0.95));border-radius:6px;padding:6px 10px;text-align:center;font-family:'Montserrat',sans-serif;font-size:0.58rem;font-weight:500;letter-spacing:0.2rem;color:#fff;text-transform:uppercase; }
 
     /* Lugar seleccionado */
-    .loc-card-sel { background:linear-gradient(135deg,rgba(201,149,108,0.9),rgba(232,184,138,0.85)) !important; border:2px solid #e8b88a !important; border-radius:10px !important; box-shadow:0 4px 20px rgba(201,149,108,0.4) !important; }
-    .loc-card-normal { border:1px solid rgba(201,149,108,0.2); border-radius:8px; background:rgba(201,149,108,0.04); transition:all 0.3s; }
-    .loc-card-matched { border:1px solid rgba(100,220,130,0.4); border-radius:8px; background:rgba(100,200,130,0.06); }
+    .loc-card-sel { background:linear-gradient(135deg,rgba(201,149,108,0.95),rgba(244,207,160,0.9)) !important; border:2px solid rgba(244,207,160,0.8) !important; border-radius:12px !important; box-shadow:0 4px 28px rgba(201,149,108,0.55),0 0 0 1px rgba(244,207,160,0.3) !important; }
+    .loc-card-normal { border:1px solid rgba(201,149,108,0.18); border-radius:10px; background:rgba(201,149,108,0.04); transition:all 0.35s; }
+    .loc-card-normal:hover { border-color:rgba(201,149,108,0.4); background:rgba(201,149,108,0.08); }
+    .loc-card-matched { border:1px solid rgba(100,220,130,0.4); border-radius:10px; background:rgba(100,200,130,0.07); }
 
     .victory-wrap { text-align:center; padding:5rem 2rem; position:relative; z-index:2; }
     .victory-title { font-family:'Cormorant Garamond',serif; font-size:3.2rem; font-weight:300; font-style:italic; color:#e8b88a; margin-bottom:1rem; }
     .victory-sub { font-family:'Montserrat',sans-serif; font-weight:200; font-size:0.72rem; letter-spacing:0.35rem; color:rgba(201,149,108,0.6); text-transform:uppercase; }
+
+    /* ── Botón SELECCIONADO (type=primary) ── */
+    @keyframes btn-sel-pulse {
+        0%,100% { box-shadow:0 0 22px rgba(201,149,108,0.65),0 4px 16px rgba(0,0,0,0.45); }
+        50% { box-shadow:0 0 40px rgba(232,184,138,0.95),0 4px 22px rgba(0,0,0,0.55),0 0 70px rgba(201,149,108,0.35); }
+    }
+    [data-testid="baseButton-primary"],
+    .stButton > button[kind="primary"] {
+        background: linear-gradient(135deg,#c9956c,#e8b88a,#f4cfa0) !important;
+        border: 2px solid rgba(244,207,160,0.7) !important;
+        color: #1a0d06 !important;
+        font-weight: 600 !important;
+        letter-spacing: 0.28rem !important;
+        text-transform: uppercase !important;
+        border-radius: 8px !important;
+        animation: btn-sel-pulse 1.8s ease-in-out infinite !important;
+        transform: none !important;
+        transition: background 0.3s, transform 0.2s !important;
+    }
+    [data-testid="baseButton-primary"]:hover,
+    .stButton > button[kind="primary"]:hover {
+        background: linear-gradient(135deg,#d4a87a,#f0c89a,#ffddb0) !important;
+        transform: translateY(-2px) scale(1.01) !important;
+        box-shadow: 0 0 50px rgba(232,184,138,1), 0 6px 25px rgba(0,0,0,0.6) !important;
+        animation: none !important;
+    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -164,7 +192,7 @@ def matching_game():
             """, unsafe_allow_html=True)
             if not p_matched:
                 btn_label = "✦  Deseleccionar" if p_sel else f"  Seleccionar foto {idx_p+1}"
-                if st.button(btn_label, key=f"ph_{place}", use_container_width=True):
+                if st.button(btn_label, key=f"ph_{place}", use_container_width=True, type="primary" if p_sel else "secondary"):
                     if p_sel:
                         st.session_state.mg_sel_photo = None
                         st.rerun()
@@ -187,7 +215,7 @@ def matching_game():
                     st.markdown(f'<div class="loc-card-sel" style="padding:1.1rem;text-align:center;font-family:Cormorant Garamond,serif;font-size:1.3rem;font-weight:600;color:#1a0d06;margin-bottom:0.5rem;">✦ &nbsp; {loc} &nbsp; ✦</div>', unsafe_allow_html=True)
                 else:
                     st.markdown(f'<div class="loc-card-normal" style="padding:1rem;text-align:center;font-family:Cormorant Garamond,serif;font-size:1.15rem;color:#c8a882;font-style:italic;margin-bottom:0.5rem;">{loc}</div>', unsafe_allow_html=True)
-                if st.button(loc, key=f"loc_{loc}", use_container_width=True):
+                if st.button(loc, key=f"loc_{loc}", use_container_width=True, type="primary" if l_sel else "secondary"):
                     if l_sel:
                         st.session_state.mg_sel_loc = None
                         st.rerun()
@@ -434,30 +462,42 @@ st.markdown("""
 .love-section {
     padding: 5rem 2rem 4rem;
     text-align: center;
-    max-width: 750px;
+    max-width: 720px;
     margin: 0 auto;
+    position: relative;
+}
+.love-section::before {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 500px; height: 500px;
+    background: radial-gradient(ellipse, rgba(201,149,108,0.04) 0%, transparent 70%);
+    pointer-events: none;
 }
 .love-ornament {
     font-family: 'Cormorant Garamond', serif;
-    font-size: 4rem;
-    color: rgba(201,149,108,0.2);
-    line-height: 1;
+    font-size: 5rem;
+    color: rgba(201,149,108,0.18);
+    line-height: 0.8;
     margin-bottom: 1.5rem;
+    text-shadow: 0 0 40px rgba(201,149,108,0.2);
 }
 .love-text {
     font-family: 'Cormorant Garamond', serif;
     font-style: italic;
-    font-size: 1.35rem;
-    color: #c8a882;
-    line-height: 2;
-    margin-bottom: 1.5rem;
+    font-size: 1.4rem;
+    color: rgba(200,168,130,0.9);
+    line-height: 2.1;
+    margin-bottom: 2rem;
 }
 .love-sign {
     font-family: 'Cormorant Garamond', serif;
-    font-size: 1.8rem;
+    font-size: 2rem;
     font-weight: 600;
     color: #e8b88a;
-    letter-spacing: 0.3rem;
+    letter-spacing: 0.4rem;
+    text-shadow: 0 0 30px rgba(232,184,138,0.5);
 }
 
 /* ── Stats ── */
@@ -470,19 +510,29 @@ st.markdown("""
 }
 .stat-item {
     text-align: center;
-    background: rgba(201,149,108,0.06);
-    border: 1px solid rgba(201,149,108,0.15);
-    border-radius: 16px;
-    padding: 1.8rem 2.5rem;
-    min-width: 120px;
-    backdrop-filter: blur(8px);
-    transition: all 0.3s;
+    background: linear-gradient(145deg, rgba(201,149,108,0.07), rgba(232,184,138,0.03));
+    border: 1px solid rgba(201,149,108,0.2);
+    border-radius: 18px;
+    padding: 2rem 2.8rem;
+    min-width: 130px;
+    backdrop-filter: blur(12px);
+    transition: all 0.4s cubic-bezier(.4,0,.2,1);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.04);
+    position: relative;
+    overflow: hidden;
+}
+.stat-item::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(232,184,138,0.5), transparent);
 }
 .stat-item:hover {
-    background: rgba(201,149,108,0.1);
-    border-color: rgba(201,149,108,0.35);
-    transform: translateY(-3px);
-    box-shadow: 0 8px 30px rgba(201,149,108,0.15);
+    background: linear-gradient(145deg, rgba(201,149,108,0.14), rgba(232,184,138,0.07));
+    border-color: rgba(201,149,108,0.45);
+    transform: translateY(-5px);
+    box-shadow: 0 16px 45px rgba(201,149,108,0.18), 0 4px 24px rgba(0,0,0,0.4);
 }
 .stat-number {
     font-family: 'Cormorant Garamond', serif;
@@ -571,30 +621,49 @@ label {
     border-radius: 8px !important;
     padding: 0.75rem 2rem !important;
     transition: all 0.35s cubic-bezier(.4,0,.2,1) !important;
+    position: relative !important;
+    overflow: hidden !important;
 }
+.stButton > button::before {
+    content: '' !important;
+    position: absolute !important;
+    top: 0; left: -100%; width: 100%; height: 100% !important;
+    background: linear-gradient(90deg, transparent, rgba(201,149,108,0.08), transparent) !important;
+    transition: left 0.5s !important;
+}
+.stButton > button:hover::before { left: 100% !important; }
 .stButton > button:hover {
-    background: linear-gradient(135deg, rgba(201,149,108,0.18), rgba(232,184,138,0.12)) !important;
-    border-color: #e8b88a !important;
+    background: linear-gradient(135deg, rgba(201,149,108,0.15), rgba(232,184,138,0.08)) !important;
+    border-color: rgba(232,184,138,0.7) !important;
     color: #f5e6d0 !important;
-    box-shadow: 0 4px 20px rgba(201,149,108,0.25) !important;
-    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 24px rgba(201,149,108,0.28), 0 0 0 1px rgba(232,184,138,0.15) !important;
+    transform: translateY(-2px) !important;
 }
 
 /* ── Media cards ── */
 .media-card {
-    background: rgba(255,255,255,0.025);
-    border: 1px solid rgba(201,149,108,0.15);
-    border-radius: 14px;
+    background: linear-gradient(160deg, rgba(255,255,255,0.035), rgba(201,149,108,0.02));
+    border: 1px solid rgba(201,149,108,0.18);
+    border-radius: 16px;
     overflow: hidden;
     margin-bottom: 0.75rem;
-    transition: all 0.35s cubic-bezier(.4,0,.2,1);
-    backdrop-filter: blur(8px);
-    box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+    transition: all 0.4s cubic-bezier(.4,0,.2,1);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 6px 30px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.04);
+    position: relative;
+}
+.media-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(201,149,108,0.4), transparent);
+    pointer-events: none;
 }
 .media-card:hover {
-    border-color: rgba(201,149,108,0.4);
-    box-shadow: 0 8px 40px rgba(201,149,108,0.15), 0 4px 24px rgba(0,0,0,0.4);
-    transform: translateY(-2px);
+    border-color: rgba(201,149,108,0.5);
+    box-shadow: 0 12px 50px rgba(201,149,108,0.18), 0 6px 30px rgba(0,0,0,0.5);
+    transform: translateY(-3px);
 }
 .media-card-header {
     padding: 0.85rem 1.4rem;
@@ -619,20 +688,67 @@ label {
 .timeline-year {
     font-family: 'Cormorant Garamond', serif;
     font-size: 5rem;
-    color: rgba(201,149,108,0.1);
+    color: rgba(201,149,108,0.12);
     font-weight: 300;
     text-align: center;
     margin: 3rem 0 0;
     line-height: 1;
     letter-spacing: 0.5rem;
-    text-shadow: 0 0 60px rgba(201,149,108,0.15);
+    animation: year-glow 5s ease-in-out infinite;
+}
+@keyframes year-glow {
+    0%,100% { text-shadow: 0 0 60px rgba(201,149,108,0.15); color: rgba(201,149,108,0.12); }
+    50% { text-shadow: 0 0 90px rgba(232,184,138,0.35); color: rgba(201,149,108,0.2); }
 }
 .timeline-connector {
-    width: 1px; height: 50px;
-    background: linear-gradient(180deg, transparent, rgba(201,149,108,0.35), transparent);
+    width: 1px; height: 60px;
+    background: linear-gradient(180deg, transparent, rgba(201,149,108,0.5), transparent);
     margin: 0 auto;
+    animation: connector-flow 2.5s ease-in-out infinite;
+}
+@keyframes connector-flow {
+    0%,100% { opacity: 0.5; transform: scaleY(0.9); }
+    50% { opacity: 1; transform: scaleY(1); }
 }
 video { border-radius: 2px; width: 100%; max-height: 440px; background: #000; }
+
+/* ── Botón eliminar (rojo suave) ── */
+.del-btn-wrap [data-testid="baseButton-secondary"],
+.del-btn-wrap .stButton > button {
+    border-color: rgba(200,80,80,0.35) !important;
+    color: rgba(210,100,100,0.85) !important;
+}
+.del-btn-wrap [data-testid="baseButton-secondary"]:hover,
+.del-btn-wrap .stButton > button:hover {
+    background: rgba(200,80,80,0.1) !important;
+    border-color: rgba(220,90,90,0.7) !important;
+    color: rgb(240,130,130) !important;
+    box-shadow: 0 4px 18px rgba(200,80,80,0.22) !important;
+}
+
+/* ── Upload zone enhancement ── */
+@keyframes upload-border-pulse {
+    0%,100% { border-color: rgba(201,149,108,0.35) !important; }
+    50% { border-color: rgba(232,184,138,0.65) !important; }
+}
+.stFileUploader > div {
+    animation: upload-border-pulse 3s ease-in-out infinite !important;
+}
+
+/* ── Input labels ── */
+.stDateInput label, .stTextArea label, .stTextInput label, .stFileUploader label {
+    letter-spacing: 0.25rem !important;
+    font-size: 0.6rem !important;
+}
+
+/* ── Save button (primary in main app — if used) ── */
+.stApp [data-testid="baseButton-primary"] {
+    background: linear-gradient(135deg,rgba(201,149,108,0.9),rgba(232,184,138,0.85)) !important;
+    border: 1px solid rgba(244,207,160,0.45) !important;
+    color: #1a0d06 !important;
+    font-weight: 500 !important;
+    box-shadow: 0 4px 20px rgba(201,149,108,0.35) !important;
+}
 </style>
 
 <!-- Canvas partículas -->
@@ -865,6 +981,7 @@ if metadata:
             </div>
             """, unsafe_allow_html=True)
 
+            st.markdown('<div class="del-btn-wrap">', unsafe_allow_html=True)
             if st.button("✕  Eliminar", key=f"del_{public_id}"):
                 try:
                     delete_media(public_id, tipo)
@@ -874,6 +991,7 @@ if metadata:
                 save_metadata(metadata)
                 st.session_state.metadata = metadata
                 st.rerun()
+            st.markdown('</div>', unsafe_allow_html=True)
 
         st.markdown('<hr style="border:none;border-top:1px solid rgba(201,149,108,0.06);margin:1rem 0 1.5rem;">', unsafe_allow_html=True)
 
