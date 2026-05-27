@@ -157,9 +157,9 @@ def matching_game():
 
         with cols[idx_p % 2]:
             st.markdown(f"""
-            <div class="{card_class}" style="overflow:hidden;position:relative;aspect-ratio:1;margin-bottom:0.4rem;">
+            <div class="{card_class}" style="overflow:hidden;position:relative;aspect-ratio:1/1;margin-bottom:0.4rem;min-height:200px;">
+                <div style="position:absolute;inset:0;background:url('{url}') center/cover no-repeat;filter:{bright_p};transition:filter 0.3s;"></div>
                 {badge_html}
-                <img src="{url}" style="width:100%;height:100%;object-fit:cover;display:block;filter:{bright_p};transition:filter 0.3s;" />
             </div>
             """, unsafe_allow_html=True)
             if not p_matched:
